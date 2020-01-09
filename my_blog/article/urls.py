@@ -24,5 +24,9 @@ urlpatterns = [
         name='increase_likes'
     ),
     path('article-update/<int:id>/', views.article_update, name='article_update'),
+    path('article-charts/', views.article_charts, name='article_charts'),
+    path('article-btccharts/', views.article_btccharts, name='article_btccharts'),
+    path('article-bitmexfg/', views.article_bitmexfg, name='article_bitmexfg'),
+    path('article-bitmexfd/', views.article_bitmexfd, name='article_bitmexfd'),
 
 ]

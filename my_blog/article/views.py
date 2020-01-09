@@ -82,8 +82,11 @@ from django.contrib.auth.decorators import login_required
 def article_create(request):
     # 判断用户是否提交数据
     if request.method == "POST":
+        print("成功")
         # 将提交的数据赋值到表单实例中
         article_post_form = ArticlePostForm(request.POST, request.FILES)
+        print(article_post_form.is_valid())
+        print("article_post_form=",article_post_form)
         # 判断提交的数据是否满足模型的要求
         if article_post_form.is_valid():
             # 保存数据，但暂时不提交到数据库中
@@ -200,3 +203,19 @@ class IncreaseLikesView(View):
         article.likes += 1
         article.save()
         return HttpResponse('success')
+
+#EOS季度持仓量图
+def article_charts(request):
+    return render(request, 'article/charts.html')
+
+#BTC季度持仓量图
+def article_btccharts(request):
+    return render(request, 'article/btccharts.html')
+
+#BITMEX_BTC持仓量图
+def article_bitmexfd(request):
+    return render(request, 'article/bitmexfd.html')
+
+#BITMEX_BTC资金费率图
+def article_bitmexfg(request):
+    return render(request, 'article/bitmexfg.html')

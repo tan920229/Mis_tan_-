@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% load staticfiles %}
+{% block title %}
+    BTC季度持仓量
+{% endblock title %}
+
+<!-- 写入 base.html 中定义的 content -->
+{% block content %}
+<!DOCTYPE html>
+<html style="height: 100%">
+   <head>
+       <meta charset="utf-8">
+   </head>
+   <body style="height: 100%; margin: 0">
+       <div id="container" style="height: 100%"></div>
+       <!--<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>-->
+       <script type="text/javascript" src="{% static 'jquery/jquery-3.3.1.js' %}"></script>
+       <script type="text/javascript" src="{% static 'echarts/echarts.min.js' %}"></script>
+       <script type="text/javascript" src="{% static 'echarts/echarts-gl.min.js' %}"></script>
+       <script type="text/javascript" src="{% static 'echarts/ecStat.min.js' %}"></script>
+       <script type="text/javascript" src="{% static 'echarts/dataTool.min.js' %}"></script>
+       <script type="text/javascript" src="{% static 'echarts/china.js' %}"></script>
+       <script type="text/javascript" src="{% static 'echarts/world.js' %}"></script>
+       <script type="text/javascript" src="{% static 'echarts/bmap.min.js' %}"></script>
+       <script type="text/javascript">
+            var dom = document.getElementById("container");
+            var myChart = echarts.init(dom);
+            var app = {};
+            option = null;
+            var value=0;
+            var t_data=[];
+            function sendAjaxRequest() {
+	  var settings = {
+	  "async": true,
+	  "crossDomain": true,
+	  "url": "http://47.52.72.21:50055/get_data_info",
+	  "method": "POST",
+	  "timeout": 0,
+	  "headers": {
+		"Content-Type": "application/json",
+		"Accept": "*/*",
+	  },
+	  "processData": false,
+	"data": JSON.stringify({"methd":"future_btc_info"}),
+	}
+
+	$.ajax(settings).done(function (response) {
+		  var data = JSON.stringify(response);
+		  var data1 = JSON.parse(response);
+
+
+
+
+			for(var i_i=0;i_i<=data1.length-1;i_i++){
+				var t_y=data1[i_i].amount;
+				var t_v=data1[i_i].timestamp;
+
+
+			var t_time = myTime(t_v);
+			var t_time_1 = +new Date(t_time);
+			var oneDay = 24 * 3600 * 1000/1440;
+			now = new Date(+t_time_1);
+			value =  parseFloat(t_y);
+			var d_t={
+						name: now.toString(),
+						value: [
+						<!--[now.getFullYear(), now.getMonth() + 1, now.getDate(), now.getHours()+8,now.getMinutes(),now.getSeconds()].join('/'),-->
+						[now.getSeconds(), now.getMinutes() + 1, now.getHours()+8, now.getDate(),now.getMonth(),now.getFullYear()].join('/'),
+						value
+					]}
+			console.log("d_t=" + JSON.stringify(d_t));
+			if (t_data.length>=3000){
+                            t_data.shift();
+                        }
+			t_data.push(d_t);
+			};
+			myChart.setOption({
+			series: [{
+				data: t_data
+				}]
+			});
+	});
+}
+function myTime(date)
+{
+	var arr=date.split("T");
+	var d=arr[0];
+	var darr = d.split('-');
+
+	var t=arr[1];
+	var tarr = t.split('.');
+	var marr = tarr[0].split(':');
+
+	var dd = parseInt(darr[0])+"/"+parseInt(darr[1])+"/"+parseInt(darr[2])+" "+parseInt(marr[0])+":"+parseInt(marr[1])+":"+parseInt(marr[2]);
+	return dd;
+}
+var data = [];
+option = {
+	title: {
+		text: 'BTC季度持仓量统计图'
+	},
+	<!-- grid: { -->
+		<!-- left: 'auto', -->
+		<!-- right: 'auto', -->
+		<!-- bottom: '14%', -->
+		<!-- top: '16%', -->
+		<!-- containLabel: true -->
+	<!-- }, -->
+tooltip: {
+	trigger: 'axis',
+	formatter: function (params) {
+		params = params[0];
+		var date = new Date(params.name);
+		<!--return date.getMinutes() + '/' +date.getHours() + '/' +date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear() + ' : ' + params.value[1];-->
+		return date.getFullYear() + '/' +(date.getMonth()+1) + '/' +date.getDate() + ':' + date.getHours()  + ':' + date.getMinutes() + ' : ' + params.value[1];
+	},
+	axisPointer: {
+		animation: false
+	}
+},
+xAxis: {
+	type: 'category',
+	splitLine: {
+		show: false
+	}
+},
+yAxis: {
+	type: 'value',
+	boundaryGap: [0, '100%'],
+	splitLine: {
+		show: false
+	}
+},
+
+dataZoom: [
+{   // 这个dataZoom组件，默认控制x轴。
+	type: 'slider', // 这个 dataZoom 组件是 slider 型 dataZoom 组件
+	start: 10,      // 左边在 10% 的位置。
+	end: 90         // 右边在 60% 的位置。
+}
+],
+series: [{
+	name: '模拟数据',
+	type: 'line',
+	showSymbol: false,
+	hoverAnimation: false,
+	data: data
+	}
+
+	]
+};
+
+if (option && typeof option === "object") {
+	myChart.setOption(option, true);
+}
+sendAjaxRequest();
+       </script>
+   </body>
+</html>
+{% endblock content %}
